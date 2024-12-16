@@ -1,82 +1,65 @@
+import java.math.*; 
 import java.util.*; 
-public class crc 
+import java.util.Random; 	
+import java.io.*;
+import java.lang.*; 
+public class leaky_bucket
 {
-	public static void main(String args[])
-	{ 
-		Scanner s=new Scanner(System.in);
-		int n;
-		System.out.println("Enter the size of the data:"); 
-		n=s.nextInt();
-		int data[]=new int[n]; 
-
-		System.out.println("Enter the data, bit by bit:"); 
-		for(int i=0; i < n; i++)
-		{
-			data[i]=s.nextInt();
-		}
-		System.out.println("Enter the size of the divisor:"); 
-		n=s.nextInt();
-		int divisor[]=new int[n]; 
-		System.out.println("Enter the divisor, bit by bit:"); 
-		for(int i=0; i < n; i++)
-		divisor[i]=s.nextInt();
-		int remainder[]=divide(data,divisor); 
-		System.out.println("\n The crc code generated is:"); 	
-		for(int i=0; i < data.length; i++)
-		System.out.print(data[i]); 
-		for(int i=0; i < remainder.length-1; i++)
-		System.out.print(remainder[i]); 
-		System.out.println();
-	int sent_data[]=new int[data.length+remainder.length-1]; 			  System.out.println("Enter the data to be sent:");
-		for(int i=0; i < sent_data.length; i++) 
-                        sent_data[i]=s.nextInt();
-		receive(sent_data,divisor);
-	}
-	static int[] divide(int old_data[],int divisor[])
-	{ 
-	   	int remainder[],i;
-		int data[]=new int[old_data.length+divisor.length]; 
-	System.arraycopy(old_data, 0,data, 0,old_data.length); 			  System.out.println("Message bits after appending divisor_length-1 0's:"); 
-		for(i=0; i<data.length-1; i++)
-		System.out.println(data[i]); 
-		remainder=new int[divisor.length]; 		
-		System.arraycopy(data, 0, remainder, 0, divisor.length); 
-		for(i=0; i < old_data.length; i++)
-		{
-			if(remainder[0]==1)
-			{
-				for(int j=1; j<divisor.length; j++)
-				{
-					remainder[j-1]=exor(remainder[j],divisor[j]);
-				}
-			}
-			else
-			{
-				for(int j=1; j < divisor.length; j++) 
-				remainder[j-1]=exor(remainder[j],0);
-			}
-			remainder[divisor.length-1]=data[i+divisor.length];
-		}
-		return remainder;
-	}
-	static int exor(int a, int b)	
-	{ 
-		if(a==b)
-		return 0;
-		return 1;
-	}
-	static void receive(int data[],int divisor[])	
-	{ 	
-		int remainder[]=divide(data, divisor); 
-		for(int i=0; i < remainder.length; i++)
-		{
-			if(remainder[i] != 0)
-			{
-				System.out.println("There is an error in received data");  
-				return;
-			}
-		}
-		System.out.println("Data was received without any error");
-
-	}
+     public static void main(String[]args)
+     {
+              int drop=0,mini,i,o_rate,b_size,nsec,p_remain=0; 
+	  int packet[]=new int[100];
+	  Scanner in=new Scanner(System.in); 
+	  System.out.print("Enter the bucket size:\n"); 
+	  b_size=in.nextInt(); 
+	  System.out.print("Enter output rate:\n"); 
+	  o_rate=in.nextInt();
+	  System.out.print("Enter the number of seconds to simulate:\n"); 		  
+              nsec=in.nextInt();
+	  Random rand=new Random(); 
+              for(i=0;i<nsec;i++)
+	  packet[i]=(rand.nextInt(1000));
+              System.out.println("seconds|packet received|packet sent| packets left|packets dropped\n"); 
+	  System.out.println("                   ");		
+	  for(i=0;i<nsec;i++)
+	  {
+	       p_remain+=packet[i]; 
+	       if(p_remain>b_size)
+	       {
+	            drop=p_remain-b_size; 
+                        p_remain=b_size; 
+		System.out.print(i+1         +"       "); 
+		System.out.print(packet[i] +"                ");
+	            mini=Math.min(p_remain,o_rate); 
+                    	System.out.print(mini +"	                 "); 
+p_remain=p_remain-mini; 
+                    	System.out.print(p_remain+"           "); 
+                    	System.out.println(drop +"	           "); 
+                    	System.out.print("	           \n"); 
+                       drop=0;
+	       }
+          }
+          while(p_remain!=0)
+          {
+ if(p_remain>b_size)
+	      	{
+	          		drop=p_remain-b_size;
+              	}
+	      	mini=Math.min(p_remain,o_rate); 
+              	System.out.print("              "+p_remain +"      	" +mini); 
+              	p_remain=p_remain-mini;
+              	System.out.println("            "+p_remain +"     	" +drop); 
+              	drop=0;
+          }
+     }
 }
+
+
+
+
+
+
+
+
+
+
